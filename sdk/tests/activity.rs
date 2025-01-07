@@ -14,7 +14,7 @@ async fn test_activity() {
     let shared::DualClients { one, two } = dual;
 
     let mut events = one.events;
-    tokio::task::spawn(async move {
+    ds::runtime::tokio_runtime().spawn(async move {
         while let Some(event) = events.recv().await {
             tracing::debug!(which = 1, event = ?event);
         }
@@ -24,7 +24,7 @@ async fn test_activity() {
     let (join_tx, join_rx) = tokio::sync::oneshot::channel();
 
     let mut events = two.events;
-    tokio::task::spawn(async move {
+    ds::runtime::tokio_runtime().spawn(async move {
         let mut invite_tx = Some(invite_tx);
         let mut join_tx = Some(join_tx);
         while let Some(event) = events.recv().await {

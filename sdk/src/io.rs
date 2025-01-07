@@ -219,7 +219,7 @@ pub(crate) fn start_io_task(app_id: i64) -> IoTask {
     // The io thread also sends messages
     let io_stx = stx.clone();
 
-    let handle = tokio::task::spawn(async move {
+    let handle = crate::runtime::tokio_runtime().spawn(async move {
         async fn io_loop(
             stream: impl SocketStream,
             app_id: i64,

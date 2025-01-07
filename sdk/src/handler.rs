@@ -32,7 +32,7 @@ pub(crate) fn handler_task(
     mut rrx: tokio::sync::mpsc::Receiver<io::IoMsg>,
     state: crate::State,
 ) -> tokio::task::JoinHandle<()> {
-    tokio::task::spawn(async move {
+    crate::runtime::tokio_runtime().spawn(async move {
         tracing::debug!("starting handler loop");
 
         let pop_nonce = |nonce: usize| -> Option<crate::NotifyItem> {
@@ -46,7 +46,7 @@ pub(crate) fn handler_task(
         // Shunt the user handler to a separate task so that we don't care about it blocking
         // when handling events
         let (user_tx, mut user_rx) = tokio::sync::mpsc::unbounded_channel();
-        let user_task = tokio::task::spawn(async move {
+        let user_task = crate::runtime::tokio_runtime().spawn(async move {
             while let Some(msg) = user_rx.recv().await {
                 handler.on_message(msg).await;
             }
@@ -248,7 +248,7 @@ fn process_frame(data_buf: Vec<u8>) -> Msg {
 }
 
 fn subscribe_task(subs: crate::Subscriptions, stx: cc::Sender<Option<Vec<u8>>>) {
-    tokio::task::spawn(async move {
+    crate::runtime::tokio_runtime().spawn(async move {
         // Assume a max of 64KiB write size and just write all of the
         // subscriptions into a single buffer rather than n
         let mut buffer = Vec::with_capacity(1024);
